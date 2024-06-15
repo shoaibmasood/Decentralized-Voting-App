@@ -76,7 +76,13 @@ contract Voting {
     );
 
     // For notifying Vote has casted
-    event voteCasted(address indexed voter, uint indexed candidateId);
+    event voteCasted(address indexed voterAddress, uint indexed candidateId);
+    // For notifying Voting has been started
+    event votingStarted(
+        uint256 _votingStartTime,
+        uint256 _votingEndTime,
+        string message
+    );
 
     //Modifiers
     // These modifer will run before the fucntion execution
@@ -279,13 +285,6 @@ contract Voting {
         return votersAddress;
     }
 
-    //Event
-    event votingStarted(
-        uint256 _votingStartTime,
-        uint256 _votingEndTime,
-        string message
-    );
-
     // Start Voting
 
     // isVotingStarted has to be reset as well not implemented yet
@@ -344,4 +343,28 @@ contract Voting {
 
         return (maxVote, winnerAddress);
     }
+
+    function resetVotingContract() public onlyOwner {
+        //Reset Candidate Mapping
+        for (uint256 i = 0; i < candidateAddress.length; i++) {
+            delete candidates[candidateAddress[i]];
+        }
+
+        //Reset Voter Mappings
+        for (uint256 i = 0; i < votersAddress.length; i++) {
+            delete voters[votersAddress[i]];
+        }
+
+        delete candidateAddress;
+        delete votersAddress;
+        delete votedVoters;
+
+        voterIdCounter = 0;
+        candidateIdCounter = 0;
+        isVotingStarted = false;
+        votingStartTime = 0;
+        votingEndTime = 0;
+    }
+
+    // VotingRemaingTime
 }
