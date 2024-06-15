@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
+import "hardhat/console.sol";
 
 contract Voting {
     // deployer of contract
@@ -8,8 +9,23 @@ contract Voting {
     uint256 public votingStartTime;
     uint256 public votingEndTime;
 
+    bool public isVotingStarted;
+
+    //Voter Registeration ID and Candidate Register ID
     uint256 private voterIdCounter;
     uint256 private candidateIdCounter;
+
+    //Winner address
+    address[] public winnerAddress;
+    //List of addresses of all candidates
+    address[] public candidateAddress;
+    mapping(address => Candidate) candidates;
+    //List of all addresses of all voters
+    address[] public votersAddress;
+    mapping(address => Voter) voters;
+
+    //List of addresses of voters who have given votes
+    address[] public votedVoters;
 
     enum ApprovalStatus {
         Pending,
@@ -27,6 +43,7 @@ contract Voting {
         // string ipfs;
     }
 
+    //Event for notifying Candidate has been added
     event candidateCreated(
         uint256 indexed registerId,
         string name,
@@ -35,10 +52,6 @@ contract Voting {
         ApprovalStatus status,
         uint256 voteCount
     );
-
-    //List of addresses of all candidates
-    address[] public candidateAddress;
-    mapping(address => Candidate) candidates;
 
     struct Voter {
         uint256 registerId; //voterId
@@ -52,6 +65,7 @@ contract Voting {
         uint256 voterAllowed; //initially set to 0
     }
 
+    //Event For notifying Voter has been added
     event voterCreated(
         uint256 indexed registerId,
         string name,
@@ -62,14 +76,7 @@ contract Voting {
     );
 
     // For notifying Vote has casted
-    event voteCased(address indexed voter, uint indexed candidateId);
-
-    //List of all addresses of all voters
-    address[] public votersAddress;
-    mapping(address => Voter) voters;
-
-    //List of addresses of voters who have given votes
-    address[] public votedVoters;
+    event voteCasted(address indexed voter, uint indexed candidateId);
 
     //Modifiers
     // These modifer will run before the fucntion execution
@@ -89,15 +96,35 @@ contract Voting {
     constructor() {
         //setting the deployer of contract  to its owner
         owner = msg.sender;
+        isVotingStarted = false;
+    }
+
+    function isUserexists(
+        address _address,
+        address[] memory usersArray
+    ) internal pure returns (bool) {
+        for (uint i = 0; i < usersArray.length; i++) {
+            if (usersArray[i] == _address) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //Add Single Candidate
     function addCandidate(
         address _candidateAddress,
         string memory _name,
-        uint256 _age,
-        string memory _ipfs
-    ) public onlyOwner {
+        uint256 _age
+    )
+        public
+        // string memory _ipfs
+        onlyOwner
+    {
+        require(
+            !isUserexists(_candidateAddress, candidateAddress),
+            "Candidate is Already Registered"
+        );
         //increment the candidateIdCounter
         candidateIdCounter++;
 
@@ -150,6 +177,10 @@ contract Voting {
         uint256 _age,
         string memory _ipfs
     ) public onlyOwner {
+        require(
+            !isUserexists(_voterAddress, votersAddress),
+            "Voter is Already Registered"
+        );
         //increment the voterIdCounter
         voterIdCounter++;
 
@@ -198,9 +229,119 @@ contract Voting {
 
         // update the candidate Vote Count
         candidates[_candidateAddress].voteCount++;
-    
+
         // candidates[_candidateAddress].voteCount += voter.voterAllowed;
 
-        emit voteCased(msg.sender, _candidateId);
+        emit voteCasted(msg.sender, _candidateId);
+    }
+
+    // Total No of Registered Voters in the system
+    function getVotersLength() public view returns (uint256) {
+        return votersAddress.length;
+    }
+
+    // Get Single Voter Data
+    function getSingleVoterData(
+        address _voterAddress
+    )
+        public
+        view
+        returns (
+            uint256,
+            string memory,
+            uint256,
+            address,
+            bool,
+            uint256,
+            uint256
+        )
+    {
+        return (
+            voters[_voterAddress].registerId,
+            voters[_voterAddress].name,
+            voters[_voterAddress].age,
+            voters[_voterAddress].voterAddress,
+            voters[_voterAddress].hasVoted,
+            voters[_voterAddress].voterAllowed,
+            // voters[_voterAddress].status,
+            // voters[_voterAddress].ipfs,
+            voters[_voterAddress].votedFor // Candidate Id
+        );
+    }
+
+    // Get List of Voted Voters
+    function getListOfVotedVoters() public view returns (address[] memory) {
+        return votedVoters;
+    }
+
+    // Get List of All Voters
+    function getVotersList() public view returns (address[] memory) {
+        return votersAddress;
+    }
+
+    //Event
+    event votingStarted(
+        uint256 _votingStartTime,
+        uint256 _votingEndTime,
+        string message
+    );
+
+    // Start Voting
+
+    // isVotingStarted has to be reset as well not implemented yet
+    function startVoting(uint256 votingDurationInMinutes) public onlyOwner {
+        require(isVotingStarted == false, "Voting is already Started");
+        require(
+            candidateAddress.length >= 2,
+            "Register Candidates Should be more than One"
+        );
+        require(votersAddress.length > 0, "There is no voter in the system");
+
+        isVotingStarted = true;
+        votingStartTime = block.timestamp;
+        votingEndTime = block.timestamp + votingDurationInMinutes * 60; // converting into seconds
+
+        emit votingStarted(
+            votingStartTime,
+            votingEndTime,
+            "Voting has sucesfully started"
+        );
+    }
+
+    //For updating the voting status
+    function updateVotingStatus() internal {
+        if (isVotingStarted && block.timestamp > votingEndTime) {
+            isVotingStarted = false;
+        }
+    }
+
+    //Announce Winner
+    function winner() public returns (uint256, address[] memory) {
+        //check if the election is finished
+        updateVotingStatus();
+        require(votingEndTime > 0, "Voting not Started");
+        require(
+            isVotingStarted == false && block.timestamp > votingEndTime,
+            "Voting is in progress, Please wait to be completed"
+        );
+
+        uint256 maxVote = 0;
+
+        for (uint i = 0; i < candidateAddress.length; i++) {
+            if (
+                candidates[candidateAddress[i]].voteCount > 0 &&
+                candidates[candidateAddress[i]].voteCount > maxVote
+            ) {
+                maxVote = candidates[candidateAddress[i]].voteCount;
+                winnerAddress = [candidateAddress[i]];
+            } else if (
+                candidates[candidateAddress[i]].voteCount > 0 &&
+                candidates[candidateAddress[i]].voteCount == maxVote
+            ) {
+                winnerAddress.push(candidateAddress[i]);
+            }
+        }
+
+        return (maxVote, winnerAddress);
     }
 }
