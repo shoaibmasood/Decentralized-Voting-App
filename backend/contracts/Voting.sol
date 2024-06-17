@@ -17,6 +17,7 @@ contract Voting {
 
     //Winner address
     address[] public winnerAddress;
+
     //List of addresses of all candidates
     address[] public candidateAddress;
     mapping(address => Candidate) candidates;
@@ -43,16 +44,6 @@ contract Voting {
         // string ipfs;
     }
 
-    //Event for notifying Candidate has been added
-    event candidateCreated(
-        uint256 indexed registerId,
-        string name,
-        uint256 age,
-        address candidateAddress,
-        ApprovalStatus status,
-        uint256 voteCount
-    );
-
     struct Voter {
         uint256 registerId; //voterId
         string name;
@@ -65,16 +56,24 @@ contract Voting {
         uint256 voterAllowed; //initially set to 0
     }
 
+    //Event for notifying Candidate has been added
+    event candidateCreated(
+        uint256 indexed registerId,
+        string name,
+        uint256 age,
+        address candidateAddress,
+        // ApprovalStatus status,
+        uint256 voteCount
+    );
+
     //Event For notifying Voter has been added
     event voterCreated(
         uint256 indexed registerId,
         string name,
         uint256 age,
         address voterAddress,
-        //  ApprovalStatus status,
         bool hasVoted
     );
-
     // For notifying Vote has casted
     event voteCasted(address indexed voterAddress, uint indexed candidateId);
     // For notifying Voting has been started
@@ -103,8 +102,11 @@ contract Voting {
         //setting the deployer of contract  to its owner
         owner = msg.sender;
         isVotingStarted = false;
+
+        console.log("The Contract is succesfully deployed");
     }
 
+    //Check if the user i.e Candidate or Voter exists in the system
     function isUserexists(
         address _address,
         address[] memory usersArray
@@ -147,9 +149,13 @@ contract Voting {
         //pushes the address of current/new candidate to address array
         candidateAddress.push(_candidateAddress);
 
-        // emit candidateCreated(
-        //     registerId, _name, _age, _candidateAddress, status, candidate.voteCount
-        // );
+        emit candidateCreated(
+            candidate.registerId,
+            _name,
+            _age,
+            _candidateAddress,
+            candidate.voteCount
+        );
     }
 
     //Get All candidatedAddress
@@ -206,13 +212,13 @@ contract Voting {
         //pushes the address of current/new voter to address array
         votersAddress.push(_voterAddress);
 
-        // emit voterCreated(
-        //     voter.registerId,
-        //     voter.name,
-        //     voter.age,
-        //     voter.voterAddress,
-        //     voter.hasVoted
-        // );
+        emit voterCreated(
+            voter.registerId,
+            voter.name,
+            voter.age,
+            voter.voterAddress,
+            voter.hasVoted
+        );
     }
 
     //Cast Vote
@@ -220,6 +226,12 @@ contract Voting {
         address _candidateAddress,
         uint256 _candidateId
     ) external onlyDuringVotingPeriod {
+        //check vote is given to registered Candidate Address
+        require(
+            isUserexists(_candidateAddress, candidateAddress),
+            "selected Candidate is not Authoraized to Vote "
+        );
+
         //Storing the referrence of Voter Struct in voter variable
         Voter storage voter = voters[msg.sender];
 
@@ -275,7 +287,7 @@ contract Voting {
         );
     }
 
-    // Get List of Voted Voters
+    // Get List of Voted Voters Array
     function getListOfVotedVoters() public view returns (address[] memory) {
         return votedVoters;
     }
@@ -286,8 +298,6 @@ contract Voting {
     }
 
     // Start Voting
-
-    // isVotingStarted has to be reset as well not implemented yet
     function startVoting(uint256 votingDurationInMinutes) public onlyOwner {
         require(isVotingStarted == false, "Voting is already Started");
         require(
@@ -316,7 +326,7 @@ contract Voting {
 
     //Announce Winner
     function winner() public returns (uint256, address[] memory) {
-        //check if the election is finished
+        //check if the election is finished then reset Votingstarted to false
         updateVotingStatus();
         require(votingEndTime > 0, "Voting not Started");
         require(
@@ -340,10 +350,13 @@ contract Voting {
                 winnerAddress.push(candidateAddress[i]);
             }
         }
-
+        // if WinnerAdress Array is empty no candidate  gets single vote, vote COunt is zero for all.
+        // if winnerAdress.lenght = 1  that is winner
+        // if  winnerAdress.length >1 there is draw
         return (maxVote, winnerAddress);
     }
 
+    // Reset Contract Values and States
     function resetVotingContract() public onlyOwner {
         //Reset Candidate Mapping
         for (uint256 i = 0; i < candidateAddress.length; i++) {
@@ -367,4 +380,13 @@ contract Voting {
     }
 
     // VotingRemaingTime
+    function getRemainingVotingTime()
+        public
+        view
+        onlyDuringVotingPeriod
+        returns (uint256)
+    {
+        // returning Reaming Time in seconds
+        return votingEndTime - block.timestamp;
+    }
 }
