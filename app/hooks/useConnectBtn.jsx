@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useMoralis } from "react-moralis";
+import { useAppContext } from "../context/AppContext";
 
 export const useConnectBtn = () => {
   const [hasMetaMask, setHasMetaMask] = useState(true);
-  const { enableWeb3, isWeb3Enabled } = useMoralis();
+  const { setAddress } = useAppContext();
 
+  //checking if metamask is installed  or not
   useEffect(() => {
-    //checking if metamask is installed  or not
     if (
       typeof window.ethereum == "undefined" &&
       typeof window.ethereum?.isMetaMask == "undefined"
@@ -19,23 +19,29 @@ export const useConnectBtn = () => {
   //check if the user already login or not
   useEffect(() => {
     if (
-      !isWeb3Enabled &&
       typeof window !== "undefined" &&
       window.localStorage.getItem("connected")
     ) {
-      enableWeb3();
+      setAddress(window.localStorage.getItem("connected"));
     }
-  }, [isWeb3Enabled]);
+  }, []);
 
-  const handleConnectBtn = async () => {
-    const ret = await enableWeb3();
-    if (typeof ret !== "undefined") {
-      // depends on what button they picked
+  const handleConnectWalletBtn = async () => {
+    try {
+      if (!window.ethereum) return alert("Please install MetaMask");
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      console.log("handle accounts hook", accounts);
       if (typeof window !== "undefined") {
-        window.localStorage.setItem("connected", "injected");
+        window.localStorage.setItem("connected", accounts[0]);
       }
+      // setAddress(accounts[0]);
+      return accounts[0];
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  return { hasMetaMask, handleConnectBtn };
+  return { hasMetaMask, handleConnectWalletBtn };
 };

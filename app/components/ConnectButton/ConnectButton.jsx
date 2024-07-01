@@ -5,12 +5,12 @@ import { useConnectBtn } from "@/app/hooks/useConnectBtn";
 
 function ConnectButton() {
   //Custom Hook
-  const { hasMetaMask, handleConnectBtn } = useConnectBtn();
+  const { hasMetaMask, handleConnectWalletBtn } = useConnectBtn();
 
   return (
     <>
       <button
-        onClick={handleConnectBtn}
+        onClick={handleConnectWalletBtn}
         className="inline-flex text-white bg-green-500 border-0 py-2 px-12 focus:outline-none hover:bg-green-600 rounded text-lg"
         // disabled={isWeb3EnableLoading}
         // disabled={hasMetaMask}

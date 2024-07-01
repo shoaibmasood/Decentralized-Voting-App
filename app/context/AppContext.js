@@ -1,42 +1,70 @@
 "use client";
 
-import Moralis from "moralis-v1";
 import { createContext, useContext, useState, useEffect } from "react";
-import { useMoralis } from "react-moralis";
 import { useRouter } from "next/navigation";
 import { ADMIN_ADDRESS } from "../constants/constants";
 
 const AppContext = createContext(undefined);
 
+//Get Connected account to wallet
+export const checkIfWalletIsConnected = async () => {
+  const account = await window.ethereum.request({ method: "eth_accounts" });
+
+  if (account.length) {
+    return account[0];
+  } else {
+    console.log("Please Install MetaMask & Connect, Reload");
+  }
+};
+
 export function AppContextWrapper({ children }) {
-  const { account, deactivateWeb3, isWeb3Enabled } = useMoralis();
+  const [address, setAddress] = useState(null);
   const router = useRouter();
 
-  console.log("context account", account, isWeb3Enabled);
+  const handleOnAccountChanged = (newAccount) => {
+    console.log(`Account changed to ${newAccount[0]}`);
+    if (newAccount.length == 0) {
+      console.log("Wallet is Disconnected");
+      setAddress(null);
+      window.localStorage.removeItem("connected");
+      router.push("/");
+    } else {
+      console.log("New Acount Changed to", newAccount[0]);
+      window, localStorage.setItem("connected", newAccount[0]);
+      setAddress(newAccount[0]);
+    }
+  };
 
-  //check if user has  switched  accounts
+  console.log("address", address);
+
+  // check if user has  switched  accounts
   useEffect(() => {
-    Moralis.onAccountChanged((newAccount) => {
-      console.log(`Account changed to ${newAccount}`);
-      if (newAccount == null) {
-        window.localStorage.removeItem("connected");
-        router.push("/");
-        deactivateWeb3();
-        console.log("Null Account found");
+    window.ethereum.on("accountsChanged", handleOnAccountChanged);
+
+    return () => {
+      if (typeof window.ethereum !== "undefined") {
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleOnAccountChanged
+        );
       }
-    });
+    };
   }, []);
 
   useEffect(() => {
-    if (account != ADMIN_ADDRESS.toLowerCase() && account) {
-      router.push("/voterView");
-    } else if (isWeb3Enabled) {
+    if (address == ADMIN_ADDRESS.toLowerCase() && address) {
       router.push("/dashboard");
+    } else if (address) {
+      router.push("/voterView");
     }
-  }, [account]);
+  }, [address]);
 
   return (
-    <AppContext.Provider value={{ account }}>{children}</AppContext.Provider>
+    <AppContext.Provider
+      value={{ address, setAddress, checkIfWalletIsConnected }}
+    >
+      {children}
+    </AppContext.Provider>
   );
 }
 

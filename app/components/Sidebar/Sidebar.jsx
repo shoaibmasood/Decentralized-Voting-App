@@ -4,9 +4,9 @@ import styles from "./Sidebar.module.css";
 import { useAppContext } from "@/app/context/AppContext";
 
 export default function SideBar() {
-  const { account } = useAppContext();
+  const { address } = useAppContext();
 
-  console.log("sidebar", account);
+  console.log("sidebar", address);
   return (
     <div>
       <aside aria-label="Sidebar">
@@ -36,10 +36,10 @@ export default function SideBar() {
             </div>
             <div className="mt-2">
               <h3 className="text-md font-semibold text-center">
-                {account ? (
+                {address ? (
                   <div className="ml-auto py-2 px-4">
-                    Connected to {account.slice(0, 6)}...
-                    {account.slice(account.length - 4)}
+                    Connected to {address.slice(0, 6)}...
+                    {address.slice(address.length - 4)}
                   </div>
                 ) : null}
               </h3>

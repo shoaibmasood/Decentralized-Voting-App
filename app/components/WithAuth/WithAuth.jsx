@@ -6,17 +6,17 @@ import { ADMIN_ADDRESS } from "../../constants/constants";
 
 function WithAuth(Component) {
   return function withAuth(props) {
-    const { account } = useAppContext();
+    const { address } = useAppContext();
 
     useEffect(() => {
-      console.log(" auth account value ", account);
+      console.log(" auth account value ", address);
 
-      if (account?.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) {
+      if (address?.toLowerCase() !== ADMIN_ADDRESS.toLowerCase()) {
         return redirect("/");
       }
-    }, [account]);
+    }, [address]);
 
-    if (account !== ADMIN_ADDRESS.toLowerCase()) {
+    if (address !== ADMIN_ADDRESS.toLowerCase()) {
       return null;
     }
     return <Component {...props} />;
