@@ -325,7 +325,7 @@ contract Voting {
     }
 
     //Announce Winner
-    function winner() public returns (uint256, address[] memory) {
+    function winner() public returns (uint256, Candidate memory) {
         //check if the election is finished then reset Votingstarted to false
         updateVotingStatus();
         require(votingEndTime > 0, "Voting not Started");
@@ -351,9 +351,18 @@ contract Voting {
             }
         }
         // if WinnerAdress Array is empty no candidate  gets single vote, vote COunt is zero for all.
+        if (winnerAddress.length == 0) {
+            revert("No Candiddate get a Votes");
+        }
+        // else if (winnerAddress.length > 1) {
+        //     for(uint i=0; i < winnerAddress.length; i++){
+        //         return(maxVote, candidates[winnerAddress[i]]);
+        //     }
+        // }
+
         // if winnerAdress.lenght = 1  that is winner
         // if  winnerAdress.length >1 there is draw
-        return (maxVote, winnerAddress);
+        return (maxVote, candidates[winnerAddress[0]]);
     }
 
     // Reset Contract Values and States
