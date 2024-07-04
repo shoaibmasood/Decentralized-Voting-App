@@ -2,8 +2,6 @@
 import { AppContextWrapper } from "./context/AppContext";
 // import { Inter } from "next/font/google";
 import "./globals.css";
-import { MoralisProvider } from "react-moralis";
-
 // const inter = Inter({ subsets: ["latin"] });
 
 // export const metadata = {
@@ -13,12 +11,10 @@ import { MoralisProvider } from "react-moralis";
 
 export default function RootLayout({ children }) {
   return (
-    <MoralisProvider initializeOnMount={false}>
-      <html lang="en">
-        <AppContextWrapper>
-          <body>{children}</body>
-        </AppContextWrapper>
-      </html>
-    </MoralisProvider>
+    <html lang="en">
+      <AppContextWrapper>
+        <body>{children}</body>
+      </AppContextWrapper>
+    </html>
   );
 }

@@ -34,8 +34,8 @@
       "artifacts": []
     },
     "C:\\msc project\\decentralize-voting-dapp\\backend\\contracts\\Voting.sol": {
-      "lastModificationDate": 1719531991561,
-      "contentHash": "39a01f5b1193a26da3d41f847e4fd85f",
+      "lastModificationDate": 1720020159634,
+      "contentHash": "163e946d3e5ee50699971ba68a9646a9",
       "sourceName": "contracts/Voting.sol",
       "solcConfig": {
         "version": "0.8.24",

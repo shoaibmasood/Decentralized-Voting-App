@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ADMIN_ADDRESS } from "../constants/constants";
+import toast from "react-hot-toast";
+import { useVotingContract } from "../hooks/useVotingContract";
 
 const AppContext = createContext(undefined);
 
@@ -17,9 +19,20 @@ export const checkIfWalletIsConnected = async () => {
   }
 };
 
+const notifySuccess = (msg) => toast.success(msg, { duration: 2000 });
+const notifyError = (msg) => toast.error(msg, { duration: 2000 });
+
 export function AppContextWrapper({ children }) {
   const [address, setAddress] = useState(null);
+  //Loading State
+  const [loading, setLoading] = useState(false);
+  //Voting Duration
+  const [votingDurationInMins, setVotingDurationInMins] = useState(null);
+
   const router = useRouter();
+
+  //custom hook for connecting with SmartContract
+  const { votingContract } = useVotingContract();
 
   const handleOnAccountChanged = (newAccount) => {
     console.log(`Account changed to ${newAccount[0]}`);
@@ -39,7 +52,7 @@ export function AppContextWrapper({ children }) {
 
   // check if user has  switched  accounts
   useEffect(() => {
-    window.ethereum.on("accountsChanged", handleOnAccountChanged);
+    window.ethereum?.on("accountsChanged", handleOnAccountChanged);
 
     return () => {
       if (typeof window.ethereum !== "undefined") {
@@ -59,9 +72,20 @@ export function AppContextWrapper({ children }) {
     }
   }, [address]);
 
+  //
   return (
     <AppContext.Provider
-      value={{ address, setAddress, checkIfWalletIsConnected }}
+      value={{
+        address,
+        setAddress,
+        checkIfWalletIsConnected,
+        notifySuccess,
+        notifyError,
+        loading,
+        setLoading,
+        votingDurationInMins,
+        setVotingDurationInMins,
+      }}
     >
       {children}
     </AppContext.Provider>

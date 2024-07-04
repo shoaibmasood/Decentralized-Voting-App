@@ -41,7 +41,7 @@ contract Voting {
         address candidateAddress;
         ApprovalStatus status;
         uint256 voteCount;
-        // string ipfs;
+        string ipfs;
     }
 
     struct Voter {
@@ -49,7 +49,6 @@ contract Voting {
         string name;
         uint256 age;
         address voterAddress;
-        ApprovalStatus status;
         bool hasVoted;
         string ipfs;
         uint256 votedFor; // track voter voted for which candidate ID
@@ -62,8 +61,8 @@ contract Voting {
         string name,
         uint256 age,
         address candidateAddress,
-        // ApprovalStatus status,
-        uint256 voteCount
+        uint256 voteCount,
+        string ipfs
     );
 
     //Event For notifying Voter has been added
@@ -72,7 +71,8 @@ contract Voting {
         string name,
         uint256 age,
         address voterAddress,
-        bool hasVoted
+        bool hasVoted,
+        string ipfs
     );
     // For notifying Vote has casted
     event voteCasted(address indexed voterAddress, uint indexed candidateId);
@@ -123,12 +123,9 @@ contract Voting {
     function addCandidate(
         address _candidateAddress,
         string memory _name,
-        uint256 _age
-    )
-        public
-        // string memory _ipfs
-        onlyOwner
-    {
+        uint256 _age,
+        string memory _ipfs
+    ) public onlyOwner {
         require(
             !isUserexists(_candidateAddress, candidateAddress),
             "Candidate is Already Registered"
@@ -143,7 +140,7 @@ contract Voting {
         candidate.registerId = candidateIdCounter;
         candidate.voteCount = 0;
         candidate.candidateAddress = _candidateAddress;
-        // candidate.ipfs = _ipfs;
+        candidate.ipfs = _ipfs;
         // candidate.status
 
         //pushes the address of current/new candidate to address array
@@ -154,7 +151,8 @@ contract Voting {
             _name,
             _age,
             _candidateAddress,
-            candidate.voteCount
+            candidate.voteCount,
+            candidate.ipfs
         );
     }
 
@@ -217,7 +215,8 @@ contract Voting {
             voter.name,
             voter.age,
             voter.voterAddress,
-            voter.hasVoted
+            voter.hasVoted,
+            voter.ipfs
         );
     }
 

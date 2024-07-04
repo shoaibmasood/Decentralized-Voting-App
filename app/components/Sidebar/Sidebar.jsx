@@ -2,10 +2,31 @@
 import Link from "next/link";
 import styles from "./Sidebar.module.css";
 import { useAppContext } from "@/app/context/AppContext";
+import { useVotingContract } from "@/app/hooks/useVotingContract";
 
 export default function SideBar() {
-  const { address } = useAppContext();
+  const { address, notifySuccess, notifyError, setLoading } = useAppContext();
+  const { votingContract } = useVotingContract();
 
+  const restContract = async () => {
+    notifySuccess("kindly wait...");
+    setLoading(true);
+
+    const contract = await votingContract();
+
+    try {
+      const transaction = await contract.resetVotingContract();
+
+      await transaction.wait();
+      setLoading(false);
+      notifySuccess("Successfully RESET ");
+      // window.location.href = "/";
+    } catch (error) {
+      setLoading(false);
+      notifySuccess("RESET failed, kindly connect to ellection commission");
+      console.log(error);
+    }
+  };
   console.log("sidebar", address);
   return (
     <div>
@@ -105,7 +126,7 @@ export default function SideBar() {
             </li>
             <li>
               <Link
-                href="/"
+                href=""
                 className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-green-100  group"
               >
                 <svg
@@ -123,7 +144,15 @@ export default function SideBar() {
                     d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3"
                   />
                 </svg>
-                <span className="flex-1 ms-3 whitespace-nowrap">Log Out</span>
+                <span className="flex-1 ms-3 whitespace-nowrap">
+                  <button
+                    onClick={() => {
+                      restContract();
+                    }}
+                  >
+                    Reset Contract{" "}
+                  </button>
+                </span>
               </Link>
             </li>
           </ul>

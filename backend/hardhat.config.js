@@ -4,12 +4,16 @@ require("@nomicfoundation/hardhat-toolbox");
 module.exports = {
   solidity: "0.8.24",
   networks: {
-    localhost: {
+    hardhat: {
       chainId: 31337,
     },
-    hardhat: {
-      loggingEnabled: true, // Enable detailed logging
-      // other configurations
-    },
+    // localhost: {
+    //   chainId: 1337,
+    //   url: "http://127.0.0.1:8545/",
+    // },
+    // hardhat: {
+    //   loggingEnabled: true, // Enable detailed logging
+    //   // other configurations
+    // },
   },
 };
