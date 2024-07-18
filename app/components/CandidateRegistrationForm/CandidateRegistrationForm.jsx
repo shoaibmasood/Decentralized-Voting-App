@@ -3,18 +3,18 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Toaster } from "react-hot-toast";
 import { InfinitySpin } from "react-loader-spinner";
-// import Input from "../Input/Input";
 import { useAppContext } from "@/app/context/AppContext";
 import { useVotingContract } from "@/app/hooks/useVotingContract";
+import { extractError } from "@/app/context/utils";
 
 function CandidateRegistrationForm() {
   const [candidateName, setCandidateName] = useState("");
   const [candidateAddress, setCandidateAddress] = useState("");
   const [candidateAge, setCandidateAge] = useState(null);
 
-  const { notifySuccess, notifyError, loading, setLoading } = useAppContext();
+  const { notifySuccess, notifyError, loading, setLoading, toggleSidebar } =
+    useAppContext();
 
-  console.log("form input", candidateAddress, candidateAge, candidateName);
   //Register Candidate
   const registerCandidate = async (
     candidateName,
@@ -22,12 +22,6 @@ function CandidateRegistrationForm() {
     candidateAge,
     imageUrl
   ) => {
-    console.log(
-      "inside register Candidate",
-      candidateAddress,
-      candidateName,
-      candidateAge
-    );
     if (!candidateName || !candidateAddress)
       return notifyError("Please fill required Fields");
     notifySuccess("Registering Candidate, Please Wait..");
@@ -69,10 +63,11 @@ function CandidateRegistrationForm() {
       console.log("transactionRecipt", await transaction.wait());
       notifySuccess("Successfully Registered Candidate");
       setLoading(false);
-      // window.location.href = "/register-candidate";
     } catch (error) {
       setLoading(false);
-      notifyError("Registration failed ");
+      notifyError("Candidate Registration failed ");
+      notifyError(extractError(error?.data?.data?.message));
+
       console.log("Error from Register Candidate Function", error);
     }
   };
@@ -88,58 +83,18 @@ function CandidateRegistrationForm() {
     registerCandidateEvent();
   }, []);
 
+  //handle Submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await registerCandidate(
+      candidateName,
+      candidateAddress,
+      candidateAge
+      // imageUrl
+    );
+  };
   return (
-    <div>
-      <Toaster />
-      <div>
-        <h1>Register New Candidate</h1>
-      </div>
-      <div>
-        <div>
-          <div>
-            <input
-              name="name"
-              type="text"
-              placeholder="enter name"
-              onChange={(e) => setCandidateName(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <input
-              name="Address"
-              type="text"
-              placeholder="enter address"
-              onChange={(e) => setCandidateAddress(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <input
-              name="Age"
-              type={Number}
-              placeholder="enter age"
-              onChange={(e) => setCandidateAge(e.target.value)}
-            />
-          </div>
-        </div>
-        <div>{/* //image upload component */}</div>
-        <div>
-          <button
-            onClick={async () => {
-              console.log("click");
-              await registerCandidate(
-                candidateName,
-                candidateAddress,
-                candidateAge
-                // imageUrl
-              );
-            }}
-          >
-            Register Candidate
-          </button>
-        </div>
-      </div>
+    <>
       {loading && (
         <InfinitySpin
           visible={true}
@@ -148,7 +103,120 @@ function CandidateRegistrationForm() {
           ariaLabel="infinity-spin-loading"
         />
       )}
-    </div>
+      <div
+        style={{ minWidth: "800px" }}
+        className="min-h-screen bg-gray-100 flex items-center justify-center"
+      >
+        <Toaster />
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
+        >
+          <button onClick={toggleSidebar} className="lg:hidden p-2 mb-4">
+            <svg
+              className="w-6 h-6 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+          <h2 className="text-2xl font-semibold mb-4 text-center">
+            Candidate Registration Form
+          </h2>
+          <div className="flex flex-col items-center mb-4">
+            <label
+              className="block text-gray-700 mb-2 text-center"
+              htmlFor="profileImage"
+            >
+              Profile Image
+            </label>
+            <input
+              type="file"
+              id="profileImage"
+              name="profileImage"
+              accept="image/*"
+              // onChange={handleImageChange}
+              className="hidden"
+            />
+            <div className="relative">
+              <label htmlFor="profileImage" className="cursor-pointer">
+                <img
+                  src="https://via.placeholder.com/150"
+                  // src={formData.profileImage ? URL.createObjectURL(formData.profileImage) : 'https://via.placeholder.com/150'}
+                  alt="Profile"
+                  className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2" htmlFor="fullname">
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              // value={formData.firstName}
+              // onChange={handleInputChange}
+              onChange={(e) => setCandidateName(e.target.value)}
+              placeholder="enter full name"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2" htmlFor="address">
+              Address
+            </label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              // value={formData.firstName}
+              // onChange={handleInputChange}
+              onChange={(e) => setCandidateAddress(e.target.value)}
+              placeholder="enter address"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2" htmlFor="age">
+              Age
+            </label>
+            <input
+              type="number"
+              id="age"
+              name="age"
+              min="0"
+              // value={formData.firstName}
+              // onChange={handleInputChange}
+              onChange={(e) => setCandidateAge(e.target.value)}
+              placeholder="enter age"
+              className="w-full p-2 border border-gray-300 rounded"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+          >
+            Register Candidate
+          </button>
+        </form>
+      </div>
+    </>
   );
 }
 

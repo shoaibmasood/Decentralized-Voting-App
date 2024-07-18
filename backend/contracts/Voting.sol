@@ -28,18 +28,11 @@ contract Voting {
     //List of addresses of voters who have given votes
     address[] public votedVoters;
 
-    enum ApprovalStatus {
-        Pending,
-        Approved,
-        Rejected
-    }
-
     struct Candidate {
         uint256 registerId;
         string name;
         uint256 age;
         address candidateAddress;
-        ApprovalStatus status;
         uint256 voteCount;
         string ipfs;
     }
@@ -141,7 +134,6 @@ contract Voting {
         candidate.voteCount = 0;
         candidate.candidateAddress = _candidateAddress;
         candidate.ipfs = _ipfs;
-        // candidate.status
 
         //pushes the address of current/new candidate to address array
         candidateAddress.push(_candidateAddress);
@@ -157,8 +149,14 @@ contract Voting {
     }
 
     //Get All candidatedAddress
-    function getALLCandidate() public view returns (address[] memory) {
-        return candidateAddress;
+    function getAllCandidates() public view returns (Candidate[] memory) {
+        Candidate[] memory candidateArray = new Candidate[](
+            candidateAddress.length
+        );
+        for (uint256 i = 0; i < candidateAddress.length; i++) {
+            candidateArray[i] = candidates[candidateAddress[i]];
+        }
+        return candidateArray;
     }
 
     //Get Total No of Candidates in System, like 2..
@@ -169,14 +167,25 @@ contract Voting {
     // Get Single Candidate Data
     function getSingleCandidateData(
         address _candidateAddress
-    ) public view returns (uint256, string memory, uint256, address, uint256) {
+    )
+        public
+        view
+        returns (
+            uint256,
+            string memory,
+            uint256,
+            address,
+            uint256,
+            string memory
+        )
+    {
         return (
             candidates[_candidateAddress].registerId,
             candidates[_candidateAddress].name,
             candidates[_candidateAddress].age,
             candidates[_candidateAddress].candidateAddress,
-            candidates[_candidateAddress].voteCount
-            // candidates[_candidateAddress].ipfs,
+            candidates[_candidateAddress].voteCount,
+            candidates[_candidateAddress].ipfs
         );
     }
 
@@ -195,9 +204,6 @@ contract Voting {
         voterIdCounter++;
 
         Voter storage voter = voters[_voterAddress];
-
-        // is this condition needed here? c
-        // require(voter.hasVoted == false, "Voter has already voted");
 
         voter.voterAllowed = 1; //this property is to check if given voter is approved or registered or not in this voting
         voter.hasVoted = false;
@@ -221,7 +227,7 @@ contract Voting {
     }
 
     //Cast Vote
-    function casteVote(
+    function castVote(
         address _candidateAddress,
         uint256 _candidateId
     ) external onlyDuringVotingPeriod {
@@ -236,6 +242,7 @@ contract Voting {
 
         //Check if the voter is already voted or not
         require(!voter.hasVoted, "You have already voted");
+        // check if the voter is eligible to vote or not
         require(voter.voterAllowed != 0, "You have no right to vote");
 
         // recording voter's vote
@@ -247,9 +254,16 @@ contract Voting {
         // update the candidate Vote Count
         candidates[_candidateAddress].voteCount++;
 
-        // candidates[_candidateAddress].voteCount += voter.voterAllowed;
-
         emit voteCasted(msg.sender, _candidateId);
+    }
+
+    //get All Voters
+    function getAllVoters() public view returns (Voter[] memory) {
+        Voter[] memory voterArray = new Voter[](votersAddress.length);
+        for (uint256 i = 0; i < votersAddress.length; i++) {
+            voterArray[i] = voters[votersAddress[i]];
+        }
+        return voterArray;
     }
 
     // Total No of Registered Voters in the system
@@ -258,42 +272,15 @@ contract Voting {
     }
 
     // Get Single Voter Data
-    function getSingleVoterData(
+    function getSingleVoter(
         address _voterAddress
-    )
-        public
-        view
-        returns (
-            uint256,
-            string memory,
-            uint256,
-            address,
-            bool,
-            uint256,
-            uint256
-        )
-    {
-        return (
-            voters[_voterAddress].registerId,
-            voters[_voterAddress].name,
-            voters[_voterAddress].age,
-            voters[_voterAddress].voterAddress,
-            voters[_voterAddress].hasVoted,
-            voters[_voterAddress].voterAllowed,
-            // voters[_voterAddress].status,
-            // voters[_voterAddress].ipfs,
-            voters[_voterAddress].votedFor // Candidate Id
-        );
+    ) public view returns (Voter memory) {
+        return voters[_voterAddress];
     }
 
     // Get List of Voted Voters Array
     function getListOfVotedVoters() public view returns (address[] memory) {
         return votedVoters;
-    }
-
-    // Get List of All Voters
-    function getVotersList() public view returns (address[] memory) {
-        return votersAddress;
     }
 
     // Start Voting
@@ -316,52 +303,30 @@ contract Voting {
         );
     }
 
-    //For updating the voting status
-    function updateVotingStatus() internal {
-        if (isVotingStarted && block.timestamp > votingEndTime) {
-            isVotingStarted = false;
-        }
+    //Stop voting
+    function stopVoting() public onlyOwner {
+        isVotingStarted = false;
+        votingEndTime = 0;
     }
 
-    //Announce Winner
-    function winner() public returns (uint256, Candidate memory) {
-        //check if the election is finished then reset Votingstarted to false
-        updateVotingStatus();
-        require(votingEndTime > 0, "Voting not Started");
+    //Get Winner
+    function getWinner() public view returns (Candidate memory) {
+        // require(votingEndTime > 0, "Voting not Started");
         require(
-            isVotingStarted == false && block.timestamp > votingEndTime,
+            block.timestamp > votingEndTime,
             "Voting is in progress, Please wait to be completed"
         );
 
+        Candidate memory winningCandidate;
         uint256 maxVote = 0;
-
-        for (uint i = 0; i < candidateAddress.length; i++) {
-            if (
-                candidates[candidateAddress[i]].voteCount > 0 &&
-                candidates[candidateAddress[i]].voteCount > maxVote
-            ) {
-                maxVote = candidates[candidateAddress[i]].voteCount;
-                winnerAddress = [candidateAddress[i]];
-            } else if (
-                candidates[candidateAddress[i]].voteCount > 0 &&
-                candidates[candidateAddress[i]].voteCount == maxVote
-            ) {
-                winnerAddress.push(candidateAddress[i]);
+        for (uint256 i = 0; i < candidateAddress.length; i++) {
+            Candidate memory candidate = candidates[candidateAddress[i]];
+            if (candidate.voteCount > maxVote) {
+                maxVote = candidate.voteCount;
+                winningCandidate = candidate;
             }
         }
-        // if WinnerAdress Array is empty no candidate  gets single vote, vote COunt is zero for all.
-        if (winnerAddress.length == 0) {
-            revert("No Candiddate get a Votes");
-        }
-        // else if (winnerAddress.length > 1) {
-        //     for(uint i=0; i < winnerAddress.length; i++){
-        //         return(maxVote, candidates[winnerAddress[i]]);
-        //     }
-        // }
-
-        // if winnerAdress.lenght = 1  that is winner
-        // if  winnerAdress.length >1 there is draw
-        return (maxVote, candidates[winnerAddress[0]]);
+        return winningCandidate;
     }
 
     // Reset Contract Values and States

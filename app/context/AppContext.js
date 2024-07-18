@@ -28,6 +28,24 @@ export function AppContextWrapper({ children }) {
   const [loading, setLoading] = useState(false);
   //Voting Duration
   const [votingDurationInMins, setVotingDurationInMins] = useState(null);
+  //set Date
+  const [startingDate, setStartingDate] = useState(Date.now());
+  //Candidates Data
+  const [candidatesData, setCandidatesData] = useState(null);
+  //Voters Data
+  const [votersData, setVotersData] = useState(null);
+  //WinnerCandidate Data
+  const [winnerCandidate, setWinnerCandidate] = useState(null);
+  // Total No of Candidates
+  const [totalCandidates, setTotalCandidates] = useState(null);
+  //Total No of Voters
+  const [totalVoters, setTotalVoters] = useState(null);
+  // TImer
+  const [endTime, setEndTime] = useState(null);
+  //Flag for Voting Started
+  const [isVotingStarted, setIsVotingStarted] = useState(null);
+  //SideBar
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const router = useRouter();
 
@@ -48,6 +66,10 @@ export function AppContextWrapper({ children }) {
     }
   };
 
+  //Toogle Side Bar
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   console.log("address", address);
 
   // check if user has  switched  accounts
@@ -83,8 +105,27 @@ export function AppContextWrapper({ children }) {
         notifyError,
         loading,
         setLoading,
+        totalCandidates,
+        setTotalCandidates,
+        totalVoters,
+        setTotalVoters,
         votingDurationInMins,
         setVotingDurationInMins,
+        startingDate,
+        setStartingDate,
+        candidatesData,
+        setCandidatesData,
+        votersData,
+        setVotersData,
+        winnerCandidate,
+        setWinnerCandidate,
+        endTime,
+        setEndTime,
+        isVotingStarted,
+        setIsVotingStarted,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        toggleSidebar,
       }}
     >
       {children}
