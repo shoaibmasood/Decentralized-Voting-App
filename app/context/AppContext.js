@@ -19,8 +19,8 @@ export const checkIfWalletIsConnected = async () => {
   }
 };
 
-const notifySuccess = (msg) => toast.success(msg, { duration: 2000 });
-const notifyError = (msg) => toast.error(msg, { duration: 2000 });
+const notifySuccess = (msg) => toast.success(msg, { duration: 3000 });
+const notifyError = (msg) => toast.error(msg, { duration: 3000 });
 
 export function AppContextWrapper({ children }) {
   const [address, setAddress] = useState(null);
@@ -46,6 +46,8 @@ export function AppContextWrapper({ children }) {
   const [isVotingStarted, setIsVotingStarted] = useState(null);
   //SideBar
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  //Voted Voters List
+  const [votedVotersList, setVotedVotersList] = useState([]);
 
   const router = useRouter();
 
@@ -126,6 +128,8 @@ export function AppContextWrapper({ children }) {
         isSidebarOpen,
         setIsSidebarOpen,
         toggleSidebar,
+        votedVotersList,
+        setVotedVotersList,
       }}
     >
       {children}

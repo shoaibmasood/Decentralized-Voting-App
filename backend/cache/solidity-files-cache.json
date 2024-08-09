@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\msc project\\decentralize-voting-dapp\\backend\\contracts\\Voting.sol": {
-      "lastModificationDate": 1721180033545,
-      "contentHash": "1e97b7ca128bf9ca015d6a2c63ae9b3b",
+      "lastModificationDate": 1723039651647,
+      "contentHash": "906de83cd8c9651442949821a95e898a",
       "sourceName": "contracts/Voting.sol",
       "solcConfig": {
         "version": "0.8.24",

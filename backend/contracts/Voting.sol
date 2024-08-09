@@ -26,7 +26,7 @@ contract Voting {
     mapping(address => Voter) voters;
 
     //List of addresses of voters who have given votes
-    address[] public votedVoters;
+    address[] private votedVoters;
 
     struct Candidate {
         uint256 registerId;
@@ -119,6 +119,7 @@ contract Voting {
         uint256 _age,
         string memory _ipfs
     ) public onlyOwner {
+        require(isVotingStarted == false, "Voting is in progress");
         require(
             !isUserexists(_candidateAddress, candidateAddress),
             "Candidate is Already Registered"
@@ -196,10 +197,13 @@ contract Voting {
         uint256 _age,
         string memory _ipfs
     ) public onlyOwner {
+        require(isVotingStarted == false, "Voting is in progress");
+
         require(
             !isUserexists(_voterAddress, votersAddress),
             "Voter is Already Registered"
         );
+
         //increment the voterIdCounter
         voterIdCounter++;
 
@@ -258,7 +262,7 @@ contract Voting {
     }
 
     //get All Voters
-    function getAllVoters() public view returns (Voter[] memory) {
+    function getAllVoters() public view onlyOwner returns (Voter[] memory) {
         Voter[] memory voterArray = new Voter[](votersAddress.length);
         for (uint256 i = 0; i < votersAddress.length; i++) {
             voterArray[i] = voters[votersAddress[i]];
@@ -274,12 +278,17 @@ contract Voting {
     // Get Single Voter Data
     function getSingleVoter(
         address _voterAddress
-    ) public view returns (Voter memory) {
+    ) public view onlyOwner returns (Voter memory) {
         return voters[_voterAddress];
     }
 
     // Get List of Voted Voters Array
-    function getListOfVotedVoters() public view returns (address[] memory) {
+    function getListOfVotedVoters()
+        public
+        view
+        onlyOwner
+        returns (address[] memory)
+    {
         return votedVoters;
     }
 

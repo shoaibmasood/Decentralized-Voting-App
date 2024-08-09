@@ -1,10 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import CandidatesProfile from "../CandidatesProfile/CandidatesProfile";
 import VotersProfile from "../VotersProfile/VotersProfile";
 import WinnerModal from "../WinnerModal/WinnerModal";
+import Auditability from "../Auditability/Auditability";
 import { Toaster } from "react-hot-toast";
-import { ColorRing } from "react-loader-spinner";
 
 import { useVotingContract } from "@/app/hooks/useVotingContract";
 import { useAppContext } from "@/app/context/AppContext";
@@ -162,6 +162,10 @@ function MainContent() {
         />
         <div>
           <WinnerModal isVotingStarted={isVotingStarted} />
+        </div>
+        <div>
+          {" "}
+          <Auditability />
         </div>
       </div>
 

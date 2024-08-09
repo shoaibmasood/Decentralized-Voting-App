@@ -4,6 +4,7 @@ import { useVotingContract } from "@/app/hooks/useVotingContract";
 import { useAppContext } from "@/app/context/AppContext";
 import CandidateCard from "./CandidateCard/CandidateCard";
 import { extractError } from "@/app/context/utils";
+import toast from "react-hot-toast";
 
 function CandidatesProfile() {
   const {
@@ -71,6 +72,13 @@ function CandidatesProfile() {
       );
       transaction.wait();
       notifySuccess("Successfully voted ");
+      console.log("Cast Vote Receipt", transaction);
+      toast(`Verfication Unique Hash: ${transaction.hash}`, {
+        duration: 10000,
+        position: "bottom-center",
+        icon: "✅",
+        style: { maxWidth: "52rem" },
+      });
       setLoading(false);
     } catch (error) {
       setLoading(false);

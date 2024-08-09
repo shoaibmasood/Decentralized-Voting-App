@@ -54,7 +54,7 @@ function VoterView() {
   //Get Voting EndTime
   const getVotingEndTime = async () => {
     const contract = await votingContract();
-    const votingEndTime = await contract.votingEndTime();
+    const votingEndTime = await contract?.votingEndTime();
     if (votingEndTime > 0) {
       setEndTime(votingEndTime);
     }

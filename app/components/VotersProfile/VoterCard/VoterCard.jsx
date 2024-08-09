@@ -17,7 +17,7 @@ function VoterCard({
   const { address: adminAddress } = useAppContext();
   return (
     <div className="p-2 shadow ">
-      <div className="h-full flex items-center border-gray-200 p-4 rounded-lg">
+      <div className="h-full flex items-center border-gray-400 p-4 rounded-lg">
         <img
           alt="team"
           className="w-16 h-16 bg-gray-100 object-cover object-center flex-shrink-0 rounded-full mr-4"
@@ -36,8 +36,8 @@ function VoterCard({
           <p className="text-gray-500">
             Has Voted:{hasVoted == true ? "Yes" : "No"}
           </p>
-          <p className="text-gray-500">Voted For Candidate ID: {votedFor}</p>
-          <p className="text-gray-500">Age: {age}</p>
+          {/* <p className="text-gray-500">Voted For Candidate ID: {votedFor}</p> */}
+          {/* <p className="text-gray-500">Age: {age}</p> */}
           {adminAddress?.toLowerCase() == ADMIN_ADDRESS.toLowerCase() ? (
             <p className="text-base leading-relaxed text-gray-500 ">
               Ipfs Url:{" "}
