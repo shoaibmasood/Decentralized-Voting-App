@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Decentralized Voting System Using Ethereum Blockchain
 
-## Getting Started
+This repository contains the code and documentation for a decentralized voting system that leverages Ethereum blockchain technology to ensure voter anonymity, verifiability, and auditability, addressing issues such as voter fraud and lack of transparency.
 
-First, run the development server:
+## Abstract
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The integration of blockchain technology with voting systems addresses key issues in traditional voting, such as voter fraud, ballot manipulation, and lack of trust. This project explores how blockchain’s immutability, decentralization, and transparency can provide a secure, tamper-proof voting system. Two research questions drive this investigation: ensuring anonymity, verifiability, and auditability, and exploring how smart contracts can establish transparent and tamper-resistant voting procedures.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The decentralized voting mechanism built on Ethereum smart contracts and IPFS focuses on privacy, transparency, and auditability. It includes a reset function to restart elections without contract redeployment. The system was rigorously tested for security and transparency, providing insights into future blockchain-based voting systems.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- **Frontend**: [Next.js 14](https://nextjs.org/)
+- **Smart Contracts**: [Solidity](https://soliditylang.org/)
+- **Development Environment**: [Hardhat](https://hardhat.org/)
+- **Blockchain Interaction**: [Ether.js](https://docs.ethers.io/)
+- **Wallet**: [MetaMask](https://metamask.io/)
+- **UI Design**: [Tailwind CSS](https://tailwindcss.com/)
+- **Decentralized Storage**: [IPFS](https://ipfs.tech/)
+- **Smart Contract IDE**: [Remix IDE](https://remix.ethereum.org/)
 
-## Learn More
+## Objective
 
-To learn more about Next.js, take a look at the following resources:
+The primary objective of this project is to develop a decentralized voting system with the following key features:
+- **Secure Voting**: Smart contracts enforce secure voting, ensuring only eligible voters can participate.
+- **Scalability and Privacy**: IPFS is integrated for private data storage, improving scalability and security.
+- **Reset Mechanism**: A reset mechanism allows elections to be managed flexibly without redeploying the smart contract.
+- **Auditability and Transparency**: Ensures data immutability while enabling audits of the voting process.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- **Voter Anonymity**: Voter privacy is protected throughout the voting process.
+- **Verifiability**: Votes are verifiable, ensuring integrity.
+- **Auditability**: The election process is fully auditable, allowing verification of results.
+- **Reset Mechanism**: Administrators can reset the election without redeploying contracts.
 
-## Deploy on Vercel
+## Installation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To run this project locally:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/your-repo-name.git
+   cd your-repo-name
